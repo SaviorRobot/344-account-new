@@ -1,8 +1,16 @@
-FROM node:24-alpine
+FROM node:20-alpine
+
 WORKDIR /app
-COPY package.json server.js index.html styles.css app.js ./
-RUN mkdir -p /app/data
-ENV PORT=3000 LEDGER_DB_PATH=/app/data/ledger.db
-EXPOSE 3000
+
+COPY package*.json ./
+RUN npm install
+
+COPY . .
+
+# 持久化SQLite数据目录
 VOLUME ["/app/data"]
+
+ENV NODE_ENV=production
+
+EXPOSE 3000
 CMD ["node", "server.js"]
