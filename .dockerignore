@@ -1,0 +1,6 @@
+data/
+preview-*.png
+.git/
+.agents/
+scripts/
+tests/

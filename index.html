@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+    <meta name="theme-color" content="#246bfd" />
+    <meta name="description" content="大家一起用的空调水费共享账本" />
+    <title>清风公账 · 空调水费共享账本</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <svg class="svg-sprite" aria-hidden="true">
+      <symbol id="i-home" viewBox="0 0 24 24"><path d="m3 11 9-8 9 8v9a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></symbol>
+      <symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></symbol>
+      <symbol id="i-users" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+      <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+      <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
+      <symbol id="i-edit" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></symbol>
+      <symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3m3 0-1 14H7L6 7m4 4v6m4-6v6"/></symbol>
+      <symbol id="i-close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
+      <symbol id="i-refresh" viewBox="0 0 24 24"><path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 4v5h5M4 13a8.1 8.1 0 0 0 15.5 2m.5 5v-5h-5"/></symbol>
+      <symbol id="i-download" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4M5 21h14"/></symbol>
+      <symbol id="i-logout" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M19 12H7"/></symbol>
+    </svg>
+
+    <div class="app-shell">
+      <aside class="sidebar" id="sidebar">
+        <div class="brand"><span class="brand-mark">风</span><div><strong>清风公账</strong><small>空调 · 水费共享账本</small></div></div>
+        <nav>
+          <button class="nav-item active" data-page="overview"><svg><use href="#i-home"/></svg>公账总览</button>
+          <button class="nav-item" data-page="records"><svg><use href="#i-list"/></svg>全部记录<span id="recordCount">0</span></button>
+          <button class="nav-item" data-page="members"><svg><use href="#i-users"/></svg>成员缴费</button>
+        </nav>
+        <div class="sync-card">
+          <span class="sync-light" id="syncLight"></span>
+          <div><strong id="syncTitle">正在连接</strong><small id="syncText">连接共享账本中…</small></div>
+        </div>
+        <button class="logout-button" id="logoutButton"><svg><use href="#i-logout"/></svg>退出登录</button>
+        <p class="sidebar-tip">任何人用手机或电脑打开同一个网址，都能看到最新账目。</p>
+      </aside>
+
+      <main>
+        <header class="topbar">
+          <button class="menu-button" id="menuButton" aria-label="打开菜单"><span></span><span></span><span></span></button>
+          <div><p id="todayText"></p><h1 id="pageTitle">大家的每一笔，都清清楚楚</h1></div>
+          <button class="primary-button" id="addButton"><svg><use href="#i-plus"/></svg><span>记一笔</span></button>
+        </header>
+
+        <section class="page active" id="page-overview">
+          <article class="balance-card">
+            <div><span class="balance-label">当前公账余额</span><strong id="balanceValue">¥0.00</strong><p id="balanceStatus">正在读取共享账本…</p></div>
+            <div class="balance-art"><i></i><i></i><span>¥</span></div>
+          </article>
+
+          <div class="stats-grid">
+            <article class="stat-card"><span class="stat-icon income">收</span><div><small>累计进账</small><strong id="incomeValue">¥0.00</strong></div></article>
+            <article class="stat-card"><span class="stat-icon expense">支</span><div><small>累计支出</small><strong id="expenseValue">¥0.00</strong></div></article>
+            <article class="stat-card"><span class="stat-icon water">水</span><div><small>买水支出</small><strong id="waterValue">¥0.00</strong></div></article>
+            <article class="stat-card"><span class="stat-icon air">风</span><div><small>空调支出</small><strong id="airValue">¥0.00</strong></div></article>
+          </div>
+
+          <div class="overview-grid">
+            <article class="panel">
+              <div class="panel-header"><div><h2>最近账目</h2><p>大家刚刚记录的收支</p></div><button class="text-button" data-jump="records">查看全部 →</button></div>
+              <div class="record-list" id="recentList"></div>
+            </article>
+            <article class="panel member-preview">
+              <div class="panel-header"><div><h2>成员缴费</h2><p>已记录的个人缴费</p></div><button class="text-button" data-jump="members">查看明细 →</button></div>
+              <div id="memberPreview"></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="page" id="page-records">
+          <article class="panel records-panel">
+            <div class="toolbar">
+              <label class="search-box"><svg><use href="#i-search"/></svg><input id="searchInput" placeholder="搜索姓名、备注或分类" /></label>
+              <select id="typeFilter"><option value="all">全部收支</option><option value="income">只看进账</option><option value="expense">只看支出</option></select>
+              <select id="categoryFilter"><option value="all">全部分类</option><option>成员缴费</option><option>公共进账</option><option>买水</option><option>空调</option><option>其他</option></select>
+              <button class="secondary-button" id="refreshButton"><svg><use href="#i-refresh"/></svg>刷新</button>
+              <button class="secondary-button" id="exportButton"><svg><use href="#i-download"/></svg>导出</button>
+            </div>
+            <div class="record-list all-records" id="allRecords"></div>
+          </article>
+        </section>
+
+        <section class="page" id="page-members">
+          <div class="member-summary" id="memberSummary"></div>
+        </section>
+      </main>
+    </div>
+
+    <div class="modal-backdrop" id="recordModal" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+        <div class="modal-header"><div><p>SHARED LEDGER</p><h2 id="modalTitle">记一笔公账</h2></div><button class="icon-button" id="closeModal"><svg><use href="#i-close"/></svg></button></div>
+        <form id="recordForm">
+          <input type="hidden" id="recordId" />
+          <div class="type-switch"><label><input type="radio" name="type" value="income" checked/><span>进账</span></label><label><input type="radio" name="type" value="expense"/><span>支出</span></label></div>
+          <label class="amount-field"><span>金额</span><div><b>¥</b><input id="amountInput" type="number" min="0.01" step="0.01" placeholder="0.00" required inputmode="decimal"/></div></label>
+          <div class="form-grid">
+            <label><span>分类</span><select id="categoryInput" required></select></label>
+            <label><span>日期</span><input id="dateInput" type="date" required/></label>
+          </div>
+          <label><span>相关成员 <small>多人可用顿号隔开</small></span><input id="memberInput" maxlength="80" placeholder="例如：高展、董培涵、赵文娇"/></label>
+          <label><span>备注</span><input id="noteInput" maxlength="100" placeholder="例如：购买 10 桶水"/></label>
+          <button class="primary-button submit-button" type="submit">保存到共享账本</button>
+        </form>
+      </section>
+    </div>
+
+    <div class="toast" id="toast" role="status"></div>
+    <script src="/app.js"></script>
+  </body>
+</html>

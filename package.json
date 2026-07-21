@@ -1,0 +1,11 @@
+{
+  "name": "344-account",
+  "version": "1.0.0",
+  "description": "多人实时同步的空调水费共享账本",
+  "scripts": {
+    "start": "node server.js",
+    "check": "node --check server.js && node --check app.js",
+    "test": "node --test tests/api.test.js"
+  },
+  "engines": { "node": ">=22.5" }
+}
