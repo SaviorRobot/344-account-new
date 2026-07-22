@@ -27,13 +27,13 @@ async function checkAuth() {
       credentials: "include"
     });
     if (response.status === 401) {
-      window.location.href = "/login.html";
+      window.location.href = "/";
       return false;
     }
     if (!response.ok) throw new Error("认证失败");
     return true;
   } catch {
-    window.location.href = "/login.html";
+    window.location.href = "/";
     return false;
   }
 }
@@ -45,7 +45,7 @@ async function loadRecords(showToast=false) {
       credentials: "include"
     });
     if (response.status === 401) {
-      window.location.href = "/login.html";
+      window.location.href = "/";
       return;
     }
     if (!response.ok) throw new Error("读取失败");
@@ -106,14 +106,14 @@ async function saveRecord(event) {
       body:JSON.stringify(payload),
       credentials:"include"
     }); 
-    if(response.status===401){ window.location.href="/login.html"; return; }
+    if(response.status===401){ window.location.href="/"; return; }
     if(!response.ok)throw new Error((await response.json()).error); 
     closeModal(); await loadRecords(); toast(id?"账目已修改":"已保存到共享账本"); 
   } catch(error){toast(error.message||"保存失败，请重试");}
 }
-async function deleteRecord(id) { if(!confirm("确定删除这笔账吗？所有人都会同步看到。"))return; try{const response=await fetch(`/api/records/${id}`,{method:"DELETE",credentials:"include"});if(response.status===401){window.location.href="/login.html";return;}if(!response.ok)throw new Error();await loadRecords();toast("账目已删除");}catch{toast("删除失败，请重试");} }
+async function deleteRecord(id) { if(!confirm("确定删除这笔账吗？所有人都会同步看到。"))return; try{const response=await fetch(`/api/records/${id}`,{method:"DELETE",credentials:"include"});if(response.status===401){window.location.href="/";return;}if(!response.ok)throw new Error();await loadRecords();toast("账目已删除");}catch{toast("删除失败，请重试");} }
 function exportCsv() { const rows=[["日期","收支","金额","分类","相关成员","备注"],...records.map(r=>[r.date,r.type==="income"?"进账":"支出",(r.amountCents/100).toFixed(2),r.category,r.member,r.note])]; const csv="\ufeff"+rows.map(row=>row.map(v=>`"${String(v??"").replaceAll('"','""')}"`).join(",")).join("\r\n"); const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})); const link=document.createElement("a"); link.href=url; link.download=`清风公账-${isoDate(today)}.csv`;link.click();URL.revokeObjectURL(url);toast("账目已导出");}
-async function logout() { try { await fetch("/api/logout", { method: "POST", credentials: "include" }); window.location.href = "/login.html"; } catch { toast("退出失败"); } }
+async function logout() { try { await fetch("/api/logout", { method: "POST", credentials: "include" }); window.location.href = "/"; } catch { toast("退出失败"); } }
 
 $$('.nav-item').forEach(el=>el.addEventListener("click",()=>setPage(el.dataset.page))); $$('[data-jump]').forEach(el=>el.addEventListener("click",()=>setPage(el.dataset.jump)));
 $("#menuButton").addEventListener("click",()=>$("#sidebar").classList.toggle("open")); $("#addButton").addEventListener("click",()=>openModal()); $("#closeModal").addEventListener("click",closeModal); $("#recordModal").addEventListener("click",e=>{if(e.target===$("#recordModal"))closeModal()});

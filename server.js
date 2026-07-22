@@ -95,6 +95,55 @@ function validate(input) {
   return {type,amountCents,category,date,member:String(input.member||"").trim().slice(0,80),note:String(input.note||"").trim().slice(0,100)};
 }
 function broadcast() { for(const res of clients)res.write(`event: records-changed\ndata: ${Date.now()}\n\n`); }
+const loginPage = `<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+<meta name="theme-color" content="#246bfd"/>
+<title>清风公账 · 登录</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-card{background:#fff;border-radius:16px;box-shadow:0 20px 60px rgba(0,0,0,.3);padding:40px;width:100%;max-width:380px;text-align:center}
+.brand{margin-bottom:32px}
+.brand-mark{display:inline-flex;align-items:center;justify-content:center;width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;font-size:24px;font-weight:700;margin-bottom:12px}
+.brand h1{font-size:20px;color:#1a202c;margin-bottom:4px}
+.brand p{font-size:14px;color:#718096}
+.login-form{text-align:left}
+.login-form label{display:block;margin-bottom:8px;font-size:14px;font-weight:500;color:#4a5568}
+.login-form input{width:100%;padding:12px 16px;border:2px solid #e2e8f0;border-radius:10px;font-size:16px;transition:border-color .2s,box-shadow .2s}
+.login-form input:focus{outline:none;border-color:#667eea;box-shadow:0 0 0 3px rgba(102,126,234,.1)}
+.login-form button{width:100%;margin-top:20px;padding:14px;border:none;border-radius:10px;background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);color:#fff;font-size:16px;font-weight:600;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.login-form button:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(102,126,234,.4)}
+.login-form button:active{transform:translateY(0)}
+.error{margin-top:12px;padding:10px 14px;background:#fee2e2;border-radius:8px;color:#dc2626;font-size:14px;display:none}
+.error.show{display:block}
+</style>
+</head>
+<body>
+<div class="login-card">
+<div class="brand"><div class="brand-mark">风</div><h1>清风公账</h1><p>空调 · 水费共享账本</p></div>
+<form class="login-form" id="loginForm"><label>访问密码</label><input type="password" id="passwordInput" placeholder="请输入访问密码" required autocomplete="off"/><button type="submit">进入账本</button><div class="error" id="error"></div></form>
+</div>
+<script>
+const form=document.getElementById('loginForm');
+const passwordInput=document.getElementById('passwordInput');
+const error=document.getElementById('error');
+form.addEventListener('submit',async(e)=>{
+e.preventDefault();
+const password=passwordInput.value.trim();
+try{
+const response=await fetch('/api/auth',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({password})});
+const result=await response.json();
+if(response.ok){window.location.href='/';}
+else{error.textContent=result.error||'密码错误';error.classList.add('show');}
+}catch{error.textContent='连接失败，请稍后重试';error.classList.add('show');}
+});
+</script>
+</body>
+</html>`;
+
 function serveStatic(req,res) { const url=new URL(req.url,"http://localhost"); const pathname=url.pathname==="/"?"/index.html":url.pathname; const allowed=new Set(["/index.html","/styles.css","/app.js"]); if(!allowed.has(pathname))return false; const types={".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"text/javascript; charset=utf-8"}; const data=fs.readFileSync(path.join(root,pathname)); res.writeHead(200,{"Content-Type":types[path.extname(pathname)],"Content-Length":data.length,"Cache-Control":pathname==="/index.html"?"no-cache":"public, max-age=3600","X-Content-Type-Options":"nosniff"});res.end(data);return true; }
 
 const server=http.createServer(async(req,res)=>{
@@ -128,11 +177,10 @@ const server=http.createServer(async(req,res)=>{
       if(req.method==="GET"&&serveStatic(req,res))return;
     }
 
-    if(req.method==="GET"&&(url.pathname==="/"||url.pathname==="/index.html")){
+    if(req.method==="GET"&&url.pathname==="/"){
       if(ACCESS_PASSWORD&&!validateSession(req)){
-        const data=fs.readFileSync(path.join(root,"login.html"));
-        res.writeHead(200,{"Content-Type":"text/html; charset=utf-8","Content-Length":data.length,"Cache-Control":"no-cache","X-Content-Type-Options":"nosniff"});
-        return res.end(data);
+        res.writeHead(200,{"Content-Type":"text/html; charset=utf-8","Content-Length":Buffer.byteLength(loginPage),"Cache-Control":"no-cache","X-Content-Type-Options":"nosniff"});
+        return res.end(loginPage);
       }
       if(serveStatic(req,res))return;
     }
