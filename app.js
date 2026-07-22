@@ -69,7 +69,7 @@ function render() {
 
 function recordHtml(item) {
   const meta=categoryMeta[item.category]||categoryMeta["其他"]; const sign=item.type==="income"?"+":"-"; const detail=[item.category,item.member,item.note].filter(Boolean).join(" · ");
-  return `<div class="record-row"><span class="record-icon" style="color:${meta.color};background:${meta.soft}">${meta.label}</span><div class="record-info"><strong>${escapeHtml(item.note||item.category)}</strong><small>${escapeHtml(detail)} · ${formatDate(item.date)}</small></div><span class="record-amount ${item.type}">${sign}${money(item.amountCents)}</span><div class="row-actions"><button class="icon-button" data-edit="${item.id}" title="修改"><svg><use href="#i-edit"/></svg></button><button class="icon-button danger" data-delete="${item.id}" title="删除"><svg><use href="#i-trash"/></svg></button></div></div>`;
+  return `<div class="record-row"><span class="record-icon" style="color:${meta.color};background:${meta.soft}">${meta.label}</span><div class="record-info"><strong>${escapeHtml(item.note||item.category)}</strong><small>${escapeHtml(detail)} · ${formatDate(item.date)}</small></div><span class="record-amount ${item.type}">${sign}${money(item.amountCents)}</span><div class="row-actions"><button class="icon-button" data-edit="${item.id}" title="修改">改</button><button class="icon-button danger" data-delete="${item.id}" title="删除">删</button></div></div>`;
 }
 function formatDate(date) { const [y,m,d]=date.split("-").map(Number); const day=new Date(y,m-1,d); return `${m}月${d}日 · ${["周日","周一","周二","周三","周四","周五","周六"][day.getDay()]}`; }
 function renderList(target, items) { target.innerHTML=items.length?items.map(recordHtml).join(""):`<div class="empty">还没有账目，点击“记一笔”开始记录</div>`; }
