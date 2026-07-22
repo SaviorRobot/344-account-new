@@ -144,7 +144,7 @@ else{error.textContent=result.error||'密码错误';error.classList.add('show');
 </body>
 </html>`;
 
-function serveStatic(req,res) { const url=new URL(req.url,"http://localhost"); const pathname=url.pathname==="/"?"/index.html":url.pathname; const allowed=new Set(["/index.html","/styles.css","/app.js"]); if(!allowed.has(pathname))return false; const types={".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"text/javascript; charset=utf-8"}; const data=fs.readFileSync(path.join(root,pathname)); res.writeHead(200,{"Content-Type":types[path.extname(pathname)],"Content-Length":data.length,"Cache-Control":pathname==="/index.html"?"no-cache":"public, max-age=3600","X-Content-Type-Options":"nosniff"});res.end(data);return true; }
+function serveStatic(req,res) { const url=new URL(req.url,"http://localhost"); const pathname=url.pathname==="/"?"/index.html":url.pathname; const allowed=new Set(["/index.html","/styles.css","/app.js"]); if(!allowed.has(pathname))return false; const types={".html":"text/html; charset=utf-8",".css":"text/css; charset=utf-8",".js":"text/javascript; charset=utf-8"}; const data=fs.readFileSync(path.join(root,pathname)); res.writeHead(200,{"Content-Type":types[path.extname(pathname)],"Content-Length":data.length,"Cache-Control":"no-cache","X-Content-Type-Options":"nosniff"});res.end(data);return true; }
 
 const server=http.createServer(async(req,res)=>{
   const url=new URL(req.url,"http://localhost");
