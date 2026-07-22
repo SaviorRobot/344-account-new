@@ -69,7 +69,7 @@ function render() {
 
 function recordHtml(item) {
   const meta=categoryMeta[item.category]||categoryMeta["其他"]; const sign=item.type==="income"?"+":"-"; const detail=[item.category,item.member,item.note].filter(Boolean).join(" · ");
-  return `<div class="record-row"><span class="record-icon" style="color:${meta.color};background:${meta.soft}">${meta.label}</span><div class="record-info"><strong>${escapeHtml(item.note||item.category)}</strong><small>${escapeHtml(detail)} · ${formatDate(item.date)}</small></div><span class="record-amount ${item.type}">${sign}${money(item.amountCents)}</span><div class="row-actions"><button class="icon-button" data-edit="${item.id}" title="修改"><svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg></button><button class="icon-button danger" data-delete="${item.id}" title="删除"><svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M4 7h16M9 7V4h6v3m3 0-1 14H7L6 7m4 4v6m4-6v6"/></svg></button></div></div>`;
+  return `<div class="record-row" data-record="${item.id}"><span class="record-icon" style="color:${meta.color};background:${meta.soft}">${meta.label}</span><div class="record-info"><strong>${escapeHtml(item.note||item.category)}</strong><small>${escapeHtml(detail)} · ${formatDate(item.date)}</small></div><span class="record-amount ${item.type}">${sign}${money(item.amountCents)}</span></div>`;
 }
 function formatDate(date) { const [y,m,d]=date.split("-").map(Number); const day=new Date(y,m-1,d); return `${m}月${d}日 · ${["周日","周一","周二","周三","周四","周五","周六"][day.getDay()]}`; }
 function renderList(target, items) { target.innerHTML=items.length?items.map(recordHtml).join(""):`<div class="empty">还没有账目，点击“记一笔”开始记录</div>`; }
@@ -91,6 +91,28 @@ function renderMembers() {
 
 function setPage(page) { currentPage=page; $$(".page").forEach(el=>el.classList.toggle("active",el.id===`page-${page}`)); $$(".nav-item").forEach(el=>el.classList.toggle("active",el.dataset.page===page)); const titles={overview:"大家的每一笔，都清清楚楚",records:"公账流水，随时可查",members:"谁交了钱，一目了然"}; $("#pageTitle").textContent=titles[page]; $("#sidebar").classList.remove("open"); }
 function updateCategories(type, selected) { const list=type==="income"?incomeCategories:expenseCategories; $("#categoryInput").innerHTML=list.map(v=>`<option ${v===selected?"selected":""}>${v}</option>`).join(""); }
+let currentDetailId = null;
+function openDetail(id) {
+  const record = records.find(r => r.id === id);
+  if (!record) return;
+  currentDetailId = id;
+  const meta = categoryMeta[record.category] || categoryMeta["其他"];
+  const sign = record.type === "income" ? "+" : "-";
+  $("#detailContent").innerHTML = `
+    <div class="detail-icon" style="color:${meta.color};background:${meta.soft}">${meta.label}</div>
+    <div class="detail-amount ${record.type}">${sign}${money(record.amountCents)}</div>
+    <div class="detail-note">${escapeHtml(record.note || record.category)}</div>
+    <div class="detail-list">
+      <div><span>收支类型</span><strong>${record.type === "income" ? "进账" : "支出"}</strong></div>
+      <div><span>分类</span><strong>${escapeHtml(record.category)}</strong></div>
+      <div><span>日期</span><strong>${formatDate(record.date)}</strong></div>
+      <div><span>相关成员</span><strong>${escapeHtml(record.member || "无")}</strong></div>
+      <div><span>备注</span><strong>${escapeHtml(record.note || "无")}</strong></div>
+    </div>
+  `;
+  $("#detailModal").hidden = false;
+}
+function closeDetail() { $("#detailModal").hidden = true; currentDetailId = null; }
 function openModal(record) {
   $("#recordForm").reset(); $("#recordId").value=record?.id||""; $("#modalTitle").textContent=record?"修改这笔账":"记一笔公账";
   const type=record?.type||"income"; $(`input[name="type"][value="${type}"]`).checked=true; updateCategories(type,record?.category); $("#amountInput").value=record?record.amountCents/100:""; $("#dateInput").value=record?.date||isoDate(today); $("#memberInput").value=record?.member||""; $("#noteInput").value=record?.note||""; $("#recordModal").hidden=false; setTimeout(()=>$("#amountInput").focus(),40);
@@ -117,8 +139,11 @@ async function logout() { try { await fetch("/api/logout", { method: "POST", cre
 
 $$('.nav-item').forEach(el=>el.addEventListener("click",()=>setPage(el.dataset.page))); $$('[data-jump]').forEach(el=>el.addEventListener("click",()=>setPage(el.dataset.jump)));
 $("#menuButton").addEventListener("click",()=>$("#sidebar").classList.toggle("open")); $("#addButton").addEventListener("click",()=>openModal()); $("#closeModal").addEventListener("click",closeModal); $("#recordModal").addEventListener("click",e=>{if(e.target===$("#recordModal"))closeModal()});
+$("#closeDetail").addEventListener("click",closeDetail); $("#detailModal").addEventListener("click",e=>{if(e.target===$("#detailModal"))closeDetail()});
+$("#editDetailBtn").addEventListener("click",()=>{const record=records.find(r=>r.id===currentDetailId); closeDetail(); openModal(record)});
+$("#deleteDetailBtn").addEventListener("click",()=>{if(currentDetailId)deleteRecord(currentDetailId); closeDetail()});
 $$('input[name="type"]').forEach(el=>el.addEventListener("change",()=>updateCategories(el.value))); $("#recordForm").addEventListener("submit",saveRecord); $("#searchInput").addEventListener("input",renderFilteredList); $("#typeFilter").addEventListener("change",renderFilteredList); $("#categoryFilter").addEventListener("change",renderFilteredList); $("#refreshButton").addEventListener("click",()=>loadRecords(true)); $("#exportButton").addEventListener("click",exportCsv); $("#logoutButton").addEventListener("click",logout);
-document.addEventListener("click",event=>{const edit=event.target.closest("[data-edit]"),del=event.target.closest("[data-delete]");if(edit)openModal(records.find(r=>r.id===edit.dataset.edit));if(del)deleteRecord(del.dataset.delete)}); document.addEventListener("keydown",e=>{if(e.key==="Escape")closeModal()});
+document.addEventListener("click",event=>{const record=event.target.closest("[data-record]");if(record)openDetail(record.dataset.record)}); document.addEventListener("keydown",e=>{if(e.key==="Escape"){closeModal(); closeDetail()}});
 $("#todayText").textContent=`${today.getFullYear()}年${today.getMonth()+1}月${today.getDate()}日 · ${["星期日","星期一","星期二","星期三","星期四","星期五","星期六"][today.getDay()]}`;
 
 checkAuth().then(authenticated => {

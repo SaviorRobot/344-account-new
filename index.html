@@ -6,7 +6,7 @@
     <meta name="theme-color" content="#246bfd" />
     <meta name="description" content="大家一起用的空调水费共享账本" />
     <title>清风公账 · 空调水费共享账本</title>
-    <link rel="stylesheet" href="/styles.css?v=2026072203" />
+    <link rel="stylesheet" href="/styles.css?v=2026072204" />
   </head>
   <body>
     <svg class="svg-sprite" aria-hidden="true">
@@ -90,9 +90,16 @@
       </main>
     </div>
 
+    <div class="modal-backdrop" id="detailModal" hidden>
+      <section class="modal" role="dialog" aria-modal="true" aria-labelledby="detailTitle">
+        <div class="modal-header"><div><p>账目详情</p><h2 id="detailTitle">查看账目</h2></div><button class="icon-button" id="closeDetail"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="m6 6 12 12M18 6 6 18"/></svg></button></div>
+        <div class="detail-content" id="detailContent"></div>
+        <div class="detail-actions"><button class="secondary-button" id="editDetailBtn"><svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M12 20h9M16.5 3.5a2.12 2.12 0 0 1 3 3L8 18l-4 1 1-4Z"/></svg>修改</button><button class="danger-button" id="deleteDetailBtn"><svg viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M4 7h16M9 7V4h6v3m3 0-1 14H7L6 7m4 4v6m4-6v6"/></svg>删除</button></div>
+      </section>
+    </div>
     <div class="modal-backdrop" id="recordModal" hidden>
       <section class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-        <div class="modal-header"><div><p>SHARED LEDGER</p><h2 id="modalTitle">记一笔公账</h2></div><button class="icon-button" id="closeModal"><svg><use href="#i-close"/></svg></button></div>
+        <div class="modal-header"><div><p>SHARED LEDGER</p><h2 id="modalTitle">记一笔公账</h2></div><button class="icon-button" id="closeModal"><svg viewBox="0 0 24 24" width="18" height="18"><path fill="currentColor" d="m6 6 12 12M18 6 6 18"/></svg></button></div>
         <form id="recordForm">
           <input type="hidden" id="recordId" />
           <div class="type-switch"><label><input type="radio" name="type" value="income" checked/><span>进账</span></label><label><input type="radio" name="type" value="expense"/><span>支出</span></label></div>
@@ -109,6 +116,6 @@
     </div>
 
     <div class="toast" id="toast" role="status"></div>
-    <script src="/app.js?v=2026072203"></script>
+    <script src="/app.js?v=2026072204"></script>
   </body>
 </html>
