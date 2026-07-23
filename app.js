@@ -51,6 +51,7 @@ async function loadRecords(showToast=false) {
     if (!response.ok) throw new Error("读取失败");
     records = await response.json();
     render();
+    setSync("online", "已连接", "账目实时同步中");
     if(showToast) toast("已刷新到最新账目");
   } catch (error) {
     setSync("error", "连接失败", "请检查网络或服务器");
